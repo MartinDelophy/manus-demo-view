@@ -11,6 +11,9 @@
                 print(caller())
                ```
     注意:
+        1. 如果发现任务中存在工具可以解决的，优先使用工具中的方法，工具方法调用案例:
+            from plugins.{PackageName}.index import {FunctionName}
+            ... 执行FunctionName传入参数, 上面{PackageName}, {FunctionName} 以具体工具名为准
         2. 非编程任务，内容的输出也应当遵循上面 ```python ```规范
         3. result 中内容尽可能的要和用户问的语言保持统一
         4. 对于调研类的需求做好可以设计网络搜索方案，我给出几种建议

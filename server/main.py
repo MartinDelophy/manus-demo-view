@@ -1,7 +1,7 @@
 import ast
 import requests
 import re
-from util import extract_business_info, extract_todo_list, extract_shell_txt, extract_python_txt
+from util import extract_business_info, extract_todo_list, extract_shell_txt, extract_python_txt, scan_markdown_files
 import subprocess
 import yaml
 
@@ -25,6 +25,8 @@ actioner_txt = extract_business_info("./prompts/actioner_prompt.md")
 
 actioner_analyze_txt = extract_business_info("./prompts/analyze_prompt.md")
 
+scan_tools_md = scan_markdown_files()
+
 # thinker 我认为就是一个思考者，思考者的作用就是根据用户的输入，来进行思考，然后给出一个回答
 def thinker(user_text):
     system_txt = flow_txt
@@ -47,7 +49,11 @@ def thinker(user_text):
 
 # actioner 我认为是任务的执行者，根据用户的输入，来执行任务，然后给出一个回答
 def actioner(user_text):
-    system_txt = actioner_txt
+    system_txt = f"""
+    您可以支配的命令有：
+    {scan_tools_md}
+    {actioner_txt}
+    """ 
     user_text = user_text
     common_params["messages"] = [
         {

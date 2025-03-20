@@ -57,3 +57,13 @@ def extract_python_txt(markdown_text):
 # 传入python代码块，执行代码块
 def run_python_code(python_code):
     exec(python_code)
+    
+    
+# 扫描plugin目录下的所有markdown文件,将内容\n拼接成一个字符串
+def scan_markdown_files():
+    markdown_files = []
+    for root, dirs, files in os.walk('server/plugins'):
+        for file in files:
+            if file.endswith('.md'):
+                markdown_files.append(os.path.join(root, file))
+    return markdown_files.join('\n')

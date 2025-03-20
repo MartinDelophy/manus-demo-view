@@ -46,6 +46,13 @@ ollama pull 你想要的模型
 ollama serve
 ```
 
+## Function call 说明
+目前 Function_call 主要存在于 `plugins` 目录下
+目录结构
+    - XX 调用名称
+    - index.py 函数出入参数
+    - readme.md 函数出入参数说明
+
 ## 说明
 目前跑的效果取决于模型的能力，可以通过修改 `server/prompts` 里面的提示词来让模型变得听话
 
