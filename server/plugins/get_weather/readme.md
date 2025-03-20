@@ -1,6 +1,9 @@
 """
 Fetches the current weather for a given location.
 
+dependencies:
+pip install requests
+
 PackageName:
 get_weather
 

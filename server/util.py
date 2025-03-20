@@ -1,4 +1,5 @@
 import re
+import os
 
 def extract_html_blocks(markdown_text):
     # 正则表达式匹配 ```html ``` 代码块
@@ -59,11 +60,17 @@ def run_python_code(python_code):
     exec(python_code)
     
     
-# 扫描plugin目录下的所有markdown文件,将内容\n拼接成一个字符串
+# 扫描plugin目录下的所有层级下一层级的markdown文件,将内容\n拼接成一个字符串
 def scan_markdown_files():
+    # 扫描 plugin 目录下的所有文件
     markdown_files = []
-    for root, dirs, files in os.walk('server/plugins'):
+    for root, dirs, files in os.walk("./plugins"):
         for file in files:
-            if file.endswith('.md'):
+            if file.endswith(".md"):
                 markdown_files.append(os.path.join(root, file))
-    return markdown_files.join('\n')
+    # 读取所有 markdown 文件的内容
+    markdown_content = ""
+    for file in markdown_files:
+        with open(file, 'r', encoding='utf-8') as f:
+            markdown_content += f.read() + "\n"
+    return markdown_content
