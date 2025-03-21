@@ -74,3 +74,17 @@ def scan_markdown_files():
         with open(file, 'r', encoding='utf-8') as f:
             markdown_content += f.read() + "\n"
     return markdown_content
+
+
+# 处理模型请求参数
+def process_request_params(request_params, modal_type):
+    return request_params
+
+
+# 处理模型响应结果
+def process_response_result(response_result, model_type):
+    print("response_result: ", response_result, model_type)
+    if model_type == "ollama":
+        return response_result["message"]["content"]
+    elif model_type == "deepseek":
+        return response_result['choices'][0]['message']['content']

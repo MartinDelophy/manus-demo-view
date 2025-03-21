@@ -6,7 +6,7 @@ import yaml
 import os
 import logging
 from dotenv import load_dotenv
-from util import extract_business_info, extract_todo_list, extract_shell_txt, extract_python_txt, scan_markdown_files
+from util import extract_business_info, extract_todo_list, extract_shell_txt, extract_python_txt, scan_markdown_files, process_request_params, process_response_result
 
 
 # 初始化环境变量
@@ -17,7 +17,7 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 # 加载配置
-with open('./example.yml', 'r') as f:
+with open('./env.yml', 'r') as f:
     config_data = yaml.safe_load(f)
 
 # 请求参数配置
@@ -44,20 +44,6 @@ actioner_analyze_txt = extract_business_info("./prompts/analyze_prompt.md")
 
 scan_tools_md = scan_markdown_files()
 
-# thinker 我认为就是一个思考者，思考者的作用就是根据用户的输入，来进行思考，然后给出一个回答
-# def thinker(user_text):
-#     system_txt = flow_txt
-#     user_text = user_text
-#     common_params["messages"] = [
-#         {
-#             "role": "system",
-#             "content": system_txt
-#         },
-#         {
-#             "role": "user",
-#             "content": user_text
-#         }
-#     ]
 def _clean_response(text):
     """清洗响应内容"""
     text = re.sub(r'```json\s*', '', text, flags=re.IGNORECASE)
@@ -83,6 +69,7 @@ def parse_task_data(raw_data):
         }
     }
 
+# thinker 我认为就是一个思考者，思考者的作用就是根据用户的输入，来进行思考，然后给出一个回答
 def thinker(task_name):
     """生成任务流程文本"""
     try:
@@ -90,6 +77,7 @@ def thinker(task_name):
             {"role": "system", "content": flow_txt},
             {"role": "user", "content": task_name}
         ]
+        process_request_params(common_params, config_data["server"]["model_type"])
         
         response = requests.post(
             config_data["server"]["url"],
@@ -97,9 +85,8 @@ def thinker(task_name):
             json=common_params,
             timeout=30
         )
-        
         if response.ok:
-            raw_text = response.json()['choices'][0]['message']['content']
+            raw_text = process_response_result(response.json(), config_data["server"]["model_type"]) 
             return _clean_response(raw_text)
         else:
             logger.error("Thinker请求失败")
@@ -109,35 +96,18 @@ def thinker(task_name):
         return None
 
 # actioner 我认为是任务的执行者，根据用户的输入，来执行任务，然后给出一个回答
-# def actioner(user_text):
-#     system_txt = f"""
-#     您可以支配的命令有：
-#     {scan_tools_md}
-#     {actioner_txt}
-#     """ 
-#     user_text = user_text
-#     common_params["messages"] = [
-#         {
-#             "role": "system",
-#             "content": system_txt
-#         },
-#         {
-#             "role": "user",
-#             "content": user_text
-#         }
-#     ]
-    
-#     response = requests.post(request_path, json=common_params, headers=headers)
-#     response = response.json()
-#     return response["message"]["content"]
 def actioner(step):
-    """执行单个步骤"""
+    system_txt = f"""
+             您可以支配的命令有：
+                {scan_tools_md}
+             {actioner_txt}
+             """
     try:
         common_params["messages"] = [
-            {"role": "system", "content": actioner_txt},
+            {"role": "system", "content": system_txt},
             {"role": "user", "content": step}
         ]
-        
+        process_request_params(common_params, config_data["server"]["model_type"])
         response = requests.post(
             config_data["server"]["url"],
             headers=headers,
@@ -146,7 +116,7 @@ def actioner(step):
         )
         
         if response.ok:
-            raw_text = response.json()['choices'][0]['message']['content']
+            raw_text = process_response_result(response.json(), config_data["server"]["model_type"])
             return _clean_response(raw_text)
         else:
             logger.error("Actioner请求失败")
@@ -225,7 +195,7 @@ def actioner_analyze(user_text):
             {"role": "system", "content": actioner_analyze_txt},
             {"role": "user", "content": user_text}
         ]
-        
+        process_request_params(common_params, config_data["server"]["model_type"])
         response = requests.post(
             config_data["server"]["url"],
             headers=headers,
@@ -236,7 +206,7 @@ def actioner_analyze(user_text):
         if not response.ok:
             return None
             
-        raw_text = response.json()['choices'][0]['message']['content']
+        raw_text = process_response_result(response.json(), config_data["server"]["model_type"])
         cleaned_text = _clean_response(raw_text)
         
         try:

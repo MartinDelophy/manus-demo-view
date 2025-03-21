@@ -1,5 +1,6 @@
 server:
   url: "https://openrouter.ai/api/v1/chat/completions"
   model: "deepseek/deepseek-chat:free"
+  model_type: "deepseek"
   key: "YOUR_KEY"
   timeout: 30  # 新增超时配置
