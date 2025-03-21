@@ -1,3 +1,5 @@
 server:
-  url: "http://127.0.0.1:11434/api/chat"
-  model: "minicpm-v"
+  url: "https://openrouter.ai/api/v1/chat/completions"
+  model: "deepseek/deepseek-chat:free"
+  key: "YOUR_KEY"
+  timeout: 30  # 新增超时配置

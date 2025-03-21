@@ -27,11 +27,19 @@ npm run dev
 ```shell
 cd server
 ```
-3. 安装服务端所需的依赖包：
+3. 创建 tmp 文件夹
+```shell
+mkdir tmp
+```
+4. 创建 .env 文件：
+```shell
+echo "OPENAI_API_KEY='你的OpenAI API Key'" > .env
+```
+5. 安装服务端所需的依赖包：
 ```shell
 pip install -r requirements.txt
 ```
-4. 运行服务端脚本：
+6. 运行服务端脚本：
 ```shell
 python server.py
 ```
