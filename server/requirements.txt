@@ -1,3 +1,9 @@
+# requests
+# websockets
+# pyyaml
+# python-dotenv
 requests
 websockets
 pyyaml
+python-dotenv
+uvloop
