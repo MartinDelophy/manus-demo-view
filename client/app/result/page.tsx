@@ -18,7 +18,6 @@ import { useWebSocket } from "@/hooks/use-websocket"
 import { ConnectionStatusIndicator } from "@/components/connection-status"
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert"
 import { PreviewContainer } from "@/components/preview/preview-container"
-import { ConfigPanel } from "@/components/config-panel"
 import { cn } from "@/lib/utils"
 
 export default function ResultPage() {
@@ -138,8 +137,6 @@ export default function ResultPage() {
 
   return (
     <div className="flex flex-col h-screen bg-zinc-950 relative">
-      {/* 配置面板 */}
-      <ConfigPanel onConfigChange={handleConfigChange} />
 
       {/* 顶部导航 */}
       <header className="bg-zinc-900 border-b border-zinc-800 p-4">

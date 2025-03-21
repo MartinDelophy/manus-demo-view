@@ -114,6 +114,7 @@ async def handle_connection(websocket):
         try:
             query = await asyncio.wait_for(websocket.recv(), timeout=10)
             task_info = initialize_task_info(json.loads(query)["query"])
+            print("任务请求信息 ====>", task_info)
         except asyncio.TimeoutError:
             await websocket.close(code=4001, reason='握手超时')
             return
@@ -124,7 +125,22 @@ async def handle_connection(websocket):
             return
             
         await safe_send(websocket, task_info)
-        await run_task(websocket, task_info)
+        # 启动任务执行协程
+        task = asyncio.create_task(run_task(websocket, task_info))
+        # 保持连接，持续监听客户端消息
+        while True:
+            try:
+                message = await websocket.recv()
+                # 这里可以根据需要处理客户端后续发送的消息
+                print(f"Received additional message from client: {message}")
+            except websockets.exceptions.ConnectionClosedOK:
+                print("Client connection closed normally")
+                task.cancel()  # 取消任务执行协程
+                break
+            except Exception as e:
+                logging.error(f"Error receiving message from client: {e}")
+                task.cancel()  # 取消任务执行协程
+                break
         
     except websockets.exceptions.ConnectionClosedOK:
         logger.info("客户端正常断开连接")
