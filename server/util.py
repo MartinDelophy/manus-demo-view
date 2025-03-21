@@ -83,8 +83,9 @@ def process_request_params(request_params, modal_type):
 
 # 处理模型响应结果
 def process_response_result(response_result, model_type):
-    print("response_result: ", response_result)
+    content = ''
     if model_type == "ollama":
-        return response_result["message"]["content"]
+        content = response_result["message"]["content"]
     elif model_type == "deepseek":
-        return response_result['choices'][0]['message']['content']
+        content = response_result['choices'][0]['message']['content']
+    return content
