@@ -39,7 +39,9 @@ echo "OPENAI_API_KEY='你的OpenAI API Key'" > .env
 ```shell
 pip install -r requirements.txt
 ```
-6. 运行服务端脚本：
+6. 配置环境文件 env.yml
+复制或修改 `example.yml` 的内容到 `env.yml` 中
+1. 运行服务端脚本：
 ```shell
 python server.py
 ```
