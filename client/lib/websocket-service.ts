@@ -120,9 +120,13 @@ export class RealWebSocket implements WebSocketService {
         try {
           const data = JSON.parse(event.data);
           const tasks = data.tasks
-          this.emit("message", {
-            data: { type: "STEP_UPDATE", step: tasks[tasks.length - 1] },
-          });
+          console.log("WebSocket message received:", data);
+          if (Reflect.has(data, "taskId")) {
+            this.emit("message", {
+              data: { type: "STEP_UPDATE", step: tasks[tasks.length - 1] },
+            });
+            return
+          }
         } catch (error) {
           console.error("Error parsing WebSocket message:", error);
           this.emit("message", { data: event.data });

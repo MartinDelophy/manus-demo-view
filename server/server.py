@@ -9,7 +9,7 @@ from util import extract_todo_list, extract_shell_txt, extract_python_txt
 # 配置日志
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
-connected_clients = []
+connected_clients = {}
 
 def generate_task_id():
     return str(uuid.uuid4())
@@ -30,11 +30,11 @@ def initialize_task_info(task_name):
         task_id = generate_task_id()
         analyze_data["status"] = "running"
         # 链接池添加任务
-        connected_clients.append({
+        connected_clients[task_id] = {
             "task_id": task_id,
             "id": analyze_data["id"],
             "status": analyze_data["status"]
-        })
+        }
         
         return {
             "taskName": task_name,
@@ -47,6 +47,7 @@ def initialize_task_info(task_name):
         return {"error": str(e)}
 
 async def safe_send(websocket, data):
+    logger.info(f"发送数据: {data}")
     """安全发送数据"""
     try:
         await websocket.send(json.dumps(data, ensure_ascii=False))
@@ -55,7 +56,6 @@ async def safe_send(websocket, data):
 
 async def run_task(websocket, task_info):
     global connected_clients
-    # todo: 任务最后要释放
     try:
         flow_text = task_info["flowText"]
         steps = extract_todo_list(flow_text)
@@ -96,6 +96,8 @@ async def run_task(websocket, task_info):
         
         # 标记任务完成
         task_info["tasks"][0]["status"] = "completed"
+        # 删除链接池中的任务
+        del connected_clients[task_info["taskId"]]
         await safe_send(websocket, task_info)
         
     except Exception as e:
@@ -110,36 +112,21 @@ async def handle_connection(websocket):
             await websocket.close(code=4000, reason='不支持的协议版本')
             return
 
-        # 接收任务请求
-        try:
-            query = await asyncio.wait_for(websocket.recv(), timeout=10)
-            task_info = initialize_task_info(json.loads(query)["query"])
-            print("任务请求信息 ====>", task_info)
-        except asyncio.TimeoutError:
-            await websocket.close(code=4001, reason='握手超时')
-            return
-            
-        # 处理任务
-        if "error" in task_info:
-            await safe_send(websocket, task_info)
-            return
-            
-        await safe_send(websocket, task_info)
-        # 启动任务执行协程
-        task = asyncio.create_task(run_task(websocket, task_info))
         # 保持连接，持续监听客户端消息
         while True:
             try:
-                message = await websocket.recv()
+                message = await asyncio.wait_for(websocket.recv(), timeout=10)
+                task_info = initialize_task_info(json.loads(message)["query"])
+                await safe_send(websocket, task_info)
+                # 启动任务执行协程
+                await run_task(websocket, task_info)
                 # 这里可以根据需要处理客户端后续发送的消息
-                print(f"Received additional message from client: {message}")
+                print(f"Received message from client: {message}")
             except websockets.exceptions.ConnectionClosedOK:
                 print("Client connection closed normally")
-                task.cancel()  # 取消任务执行协程
                 break
             except Exception as e:
                 logging.error(f"Error receiving message from client: {e}")
-                task.cancel()  # 取消任务执行协程
                 break
         
     except websockets.exceptions.ConnectionClosedOK:
