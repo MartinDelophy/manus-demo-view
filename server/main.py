@@ -111,7 +111,8 @@ def actioner(step):
         
         if response.ok:
             raw_text = process_response_result(response.json(), config_data["server"]["model_type"])
-            return extract_json_txt(raw_text)[0]
+            logger.info(f"Actioner响应: {raw_text}")
+            return raw_text
         else:
             logger.error("Actioner请求失败")
             return None
