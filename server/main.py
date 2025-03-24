@@ -6,7 +6,7 @@ import yaml
 import os
 import logging
 from dotenv import load_dotenv
-from util import extract_business_info, extract_todo_list, extract_shell_txt, extract_python_txt, scan_markdown_files, process_request_params, process_response_result
+from util import extract_business_info, extract_todo_list, extract_shell_txt, extract_python_txt, scan_markdown_files, process_request_params, process_response_result, extract_json_txt
 
 
 # 初始化环境变量
@@ -44,12 +44,6 @@ actioner_analyze_txt = extract_business_info("./prompts/analyze_prompt.md")
 
 scan_tools_md = scan_markdown_files()
 
-def _clean_response(text):
-    """清洗响应内容"""
-    text = re.sub(r'```json\s*', '', text, flags=re.IGNORECASE)
-    text = re.sub(r'\s*```', '', text)
-    text = re.sub(r'[\x00-\x09\x0B-\x1F\x7F]', '', text)
-    return text.strip()
 
 def parse_task_data(raw_data):
     """转换任务数据结构"""
@@ -87,7 +81,7 @@ def thinker(task_name):
         )
         if response.ok:
             raw_text = process_response_result(response.json(), config_data["server"]["model_type"]) 
-            return _clean_response(raw_text)
+            return raw_text
         else:
             logger.error("Thinker请求失败")
             return None
@@ -117,7 +111,7 @@ def actioner(step):
         
         if response.ok:
             raw_text = process_response_result(response.json(), config_data["server"]["model_type"])
-            return _clean_response(raw_text)
+            return extract_json_txt(raw_text)[0]
         else:
             logger.error("Actioner请求失败")
             return None
@@ -207,8 +201,7 @@ def actioner_analyze(user_text):
             return None
             
         raw_text = process_response_result(response.json(), config_data["server"]["model_type"])
-        cleaned_text = _clean_response(raw_text)
-        
+        cleaned_text = extract_json_txt(raw_text)[0]
         try:
             raw_data = json.loads(cleaned_text)
             return parse_task_data(raw_data)
