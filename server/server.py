@@ -15,7 +15,7 @@ connected_clients = {}
 def generate_task_id():
     return str(uuid.uuid4())
 
-def initialize_task_info(websocket, task_name):
+async def initialize_task_info(websocket, task_name):
     global connected_clients
     try:
         flow_text = thinker(task_name)
@@ -114,7 +114,7 @@ async def handle_connection(websocket):
         while True:
             try:
                 message = await websocket.recv()
-                task_info = initialize_task_info(websocket, json.loads(message)["query"])
+                task_info = await initialize_task_info(websocket, json.loads(message)["query"])
                 # 启动任务执行协程
                 await run_task(websocket, task_info)
                 # 这里可以根据需要处理客户端后续发送的消息
