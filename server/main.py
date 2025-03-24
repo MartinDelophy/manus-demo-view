@@ -77,7 +77,7 @@ def thinker(task_name):
             config_data["server"]["url"],
             headers=headers,
             json=common_params,
-            timeout=30
+            timeout=None
         )
         if response.ok:
             raw_text = process_response_result(response.json(), config_data["server"]["model_type"]) 
@@ -106,7 +106,7 @@ def actioner(step):
             config_data["server"]["url"],
             headers=headers,
             json=common_params,
-            timeout=30
+            timeout=None
         )
         
         if response.ok:
@@ -195,7 +195,7 @@ def actioner_analyze(user_text):
             config_data["server"]["url"],
             headers=headers,
             json=common_params,
-            timeout=30
+            timeout=None
         )
         
         if not response.ok:
