@@ -15,7 +15,7 @@ connected_clients = {}
 def generate_task_id():
     return str(uuid.uuid4())
 
-def initialize_task_info(task_name):
+def initialize_task_info(websocket, task_name):
     global connected_clients
     try:
         flow_text = thinker(task_name)
@@ -35,13 +35,14 @@ def initialize_task_info(task_name):
             "id": analyze_data["id"],
             "status": analyze_data["status"]
         }
-        
-        return {
+        task_info = {
             "taskName": task_name,
             "taskId": task_id,
             "tasks": [analyze_data],
             "flow_text": flow_text
         }
+        await safe_send(websocket, task_info)
+        return task_info
     except Exception as e:
         logger.error(f"初始化失败: {str(e)}")
         return {"error": str(e)}
@@ -90,13 +91,6 @@ async def run_task(websocket, task_info):
             
             # 更新上下文
             context.append(response)
-            
-            # 更新进度
-            await safe_send(websocket, {
-                "currentStep": step_idx + 1,
-                "totalSteps": len(steps),
-                "context": context[-3:]
-            })
         
         # 标记任务完成
         task_info["tasks"][0]["status"] = "completed"
@@ -120,8 +114,7 @@ async def handle_connection(websocket):
         while True:
             try:
                 message = await websocket.recv()
-                task_info = initialize_task_info(json.loads(message)["query"])
-                await safe_send(websocket, task_info)
+                task_info = initialize_task_info(websocket, json.loads(message)["query"])
                 # 启动任务执行协程
                 await run_task(websocket, task_info)
                 # 这里可以根据需要处理客户端后续发送的消息
