@@ -5,6 +5,7 @@ import json
 import logging
 from main import thinker, actioner, actioner_analyze
 from util import extract_todo_list, extract_shell_txt, extract_python_txt, execute_command
+import subprocess
 
 # 配置日志
 logging.basicConfig(level=logging.INFO)
