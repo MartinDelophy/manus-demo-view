@@ -91,7 +91,7 @@ def process_response_result(response_result, model_type):
         content = response_result['choices'][0]['message']['content']
     return content
 
-def execute_command(command, call_back):
+async def execute_command(command, call_back):
     try:
         # 创建子进程，将标准输出重定向到管道，设置以文本模式读取
         process = subprocess.Popen(command, stdout=subprocess.PIPE, universal_newlines=True)
@@ -104,7 +104,7 @@ def execute_command(command, call_back):
             if output:
                 strip_output += output.strip() + '\n'
                 print(output.strip())
-                call_back(strip_output)
+                await call_back(strip_output)
 
         # 获取子进程的返回码
         returncode = process.poll()

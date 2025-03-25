@@ -79,17 +79,17 @@ async def run_task(websocket, task_info):
             # 第一次上报任务信息只是分析结果
             await safe_send(websocket, task_info)
             # 上报任务执行过程
-            def report(command):
+            async def report(command):
                 analyze_data["type"] = "txt"
                 analyze_data["content"] = command
-                asyncio.run(safe_send(websocket, task_info))
+                await safe_send(websocket, task_info)
             
             # 处理代码执行
             if shell_code := extract_shell_txt(response):
                 if len(shell_code) > 0:
                     with open('./tmp/sandbox_code.sh', 'w') as f:
                         f.write(shell_code[0])
-                    execute_command(["sh", "./tmp/sandbox_code.sh"], report)
+                    await execute_command(["sh", "./tmp/sandbox_code.sh"], report)
                 
             if python_code := extract_python_txt(response):
                 if len(python_code) > 0:
@@ -98,6 +98,7 @@ async def run_task(websocket, task_info):
                 result = subprocess.run(['python', './tmp/sandbox_code.py'], capture_output=True, text=True, check=True)
                 analyze_data["type"] = "txt"
                 analyze_data["content"] = result.stdout
+                print(f"Python执行结果: {result.stdout}")
                 
             context_content = f"""
             第 {step_idx + 1} 步: {step} 的内容产出:

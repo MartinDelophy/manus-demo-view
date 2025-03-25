@@ -140,6 +140,7 @@ def actioner_analyze(user_text):
             return None
             
         raw_text = process_response_result(response.json(), config_data["server"]["model_type"])
+        print(f"Actioner分析结果: {raw_text}")
         cleaned_text = extract_json_txt(raw_text)[0]
         try:
             raw_data = json.loads(cleaned_text)
