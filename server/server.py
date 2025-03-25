@@ -83,7 +83,8 @@ async def run_task(websocket, task_info):
                 analyze_data["type"] = "txt"
                 if analyze_data.get("preview"):
                     analyze_data["preview"]["type"] = "txt"
-                    analyze_data["preview"]["content"] = command
+                    if command:
+                        analyze_data["preview"]["content"] = command
                 await safe_send(websocket, task_info)
             
             # 处理代码执行
@@ -101,7 +102,8 @@ async def run_task(websocket, task_info):
                 analyze_data["type"] = "txt"
                 if analyze_data.get("preview"):
                     analyze_data["preview"]["type"] = "txt"
-                    analyze_data["preview"]["content"] = result.stdout
+                    if result.stderr:
+                        analyze_data["preview"]["content"] = result.stderr
                 print(f"Python执行结果: {result.stdout}")
                 
             context_content = f"""
