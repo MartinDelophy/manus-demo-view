@@ -152,7 +152,7 @@ export function PreviewContent({
       <div className="p-4">
         {type === "text" && <div className="text-zinc-300 whitespace-pre-wrap">{content}</div>}
 
-        {(type === "code" || type === "terminal") && <div className="font-mono text-sm">{highlightedContent}</div>}
+        {(type === "code" || type === "terminal") && <div className="font-mono text-sm" >{highlightedContent}</div>}
 
         {type === "image" && (
           <div className="flex items-center justify-center">
