@@ -41,6 +41,7 @@ async def initialize_task_info(websocket, task_name):
             "tasks": [analyze_data],
             "flow_text": flow_text
         }
+        print("流程信息: ",task_info)
         await safe_send(websocket, task_info)
         return task_info
     except Exception as e:
@@ -48,7 +49,6 @@ async def initialize_task_info(websocket, task_name):
         return {"error": str(e)}
 
 async def safe_send(websocket, data):
-    logger.info(f"发送数据: {data}")
     """安全发送数据"""
     try:
         await websocket.send(json.dumps(data, ensure_ascii=False))
@@ -66,6 +66,7 @@ async def run_task(websocket, task_info):
         for step_idx, step in enumerate(steps):
             # 执行当前步骤
             response = await asyncio.to_thread(actioner, "\n".join(context))
+            print(f"步骤{step_idx + 1}:{step}: ",response)
             # 输出分析结果
             analyze_data = actioner_analyze(response)
             analyze_data["id"] = task_info["tasks"][step_idx]["id"] + 1

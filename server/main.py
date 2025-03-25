@@ -92,9 +92,10 @@ def thinker(task_name):
 # actioner 我认为是任务的执行者，根据用户的输入，来执行任务，然后给出一个回答
 def actioner(user_text):
     system_txt = f"""
-             您可以支配的命令有：
+            {actioner_txt}
+            ########################################
+            您可以使用的工具规范如下：
              {scan_tools_md}
-             {actioner_txt}
              """
     try:
         common_params["messages"] = [
