@@ -44,7 +44,6 @@ const DEFAULT_CONFIG: WebSocketConfig = {
   useMock: false,
 };
 
-
 // WebSocket基础接口
 export interface WebSocketService {
   connect(query: string): void;
@@ -119,13 +118,13 @@ export class RealWebSocket implements WebSocketService {
       this.socket.onmessage = (event) => {
         try {
           const data = JSON.parse(event.data);
-          const tasks = data.tasks
+          const tasks = data.tasks;
           console.log("WebSocket message received:", data);
           if (Reflect.has(data, "taskId")) {
             this.emit("message", {
-              data: { step: tasks[tasks.length - 1] },
+              data: { taskId: data?.taskId, step: tasks[tasks.length - 1] },
             });
-            return
+            return;
           }
         } catch (error) {
           console.error("Error parsing WebSocket message:", error);
@@ -232,7 +231,7 @@ export function createWebSocketService(
 ): WebSocketService {
   const finalConfig = { ...DEFAULT_CONFIG, ...config };
 
-    return new RealWebSocket(finalConfig.url);
+  return new RealWebSocket(finalConfig.url);
 }
 
 // 创建WebSocket服务实例

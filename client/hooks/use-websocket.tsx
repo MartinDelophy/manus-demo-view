@@ -32,6 +32,7 @@ export function useWebSocket(): UseWebSocketReturn {
 
   // 使用refs来存储最新的状态，避免闭包问题
   const stepsRef = useRef<ExecutionStep[]>([]);
+  const taskIdRef = useRef<number | null>(null);
 
   // 连接WebSocket
   const connect = useCallback((query: string) => {
@@ -77,6 +78,11 @@ export function useWebSocket(): UseWebSocketReturn {
 
         const updatedStep = data.step;
         let newSteps: ExecutionStep[] = [];
+        // 如果任务ID已更改，则重置步骤
+        if (taskIdRef.current != data.taskId) {
+          stepsRef.current = [];
+          taskIdRef.current = data.taskId;
+        }
         // 如果步骤已存在，则更新它
         if (stepsRef.current.some((step) => step.id === updatedStep.id)) {
           newSteps = stepsRef.current.map((step) =>
