@@ -81,6 +81,7 @@ def thinker(task_name):
         )
         if response.ok:
             raw_text = process_response_result(response.json(), config_data["server"]["model_type"]) 
+            print(f"Thinker响应: {raw_text}")
             return raw_text
         else:
             logger.error("Thinker请求失败")
