@@ -60,21 +60,24 @@ async def run_task(websocket, task_info):
     try:
         flow_text = task_info["flow_text"]
         steps = extract_todo_list(flow_text)
+        task_info["max_steps"] = len(steps)
         context = []
         
         for step_idx, step in enumerate(steps):
-            # 更新任务状态
-            task_info["tasks"][0]["status"] = "running"
-            # 任务ID自增
-            task_info["tasks"][0]["id"] += 1 
-            await safe_send(websocket, task_info)
-            
             # 执行当前步骤
-            response = await asyncio.to_thread(actioner, step)
-            
-            # todo: 上报任务执行过程
-            def report():
-                pass
+            response = await asyncio.to_thread(actioner, "\n".join(context))
+            # 输出分析结果
+            analyze_data = actioner_analyze(response)
+            analyze_data["id"] = task_info["tasks"][step_idx]["id"] + 1
+            analyze_data["status"] = "running"
+            task_info["tasks"].append(analyze_data)
+            # 第一次上报任务信息只是分析结果
+            await safe_send(websocket, task_info)
+            # 上报任务执行过程
+            def report(command):
+                analyze_data["type"] = "txt"
+                analyze_data["content"] = command
+                asyncio.run(safe_send(websocket, task_info))
             
             # 处理代码执行
             if shell_code := extract_shell_txt(response):
@@ -88,15 +91,23 @@ async def run_task(websocket, task_info):
                     with open('./tmp/sandbox_code.py', 'w') as f:
                         f.write(python_code[0])
                 result = subprocess.run(['python', './tmp/sandbox_code.py'], capture_output=True, text=True, check=True)
+                analyze_data["type"] = "txt"
+                analyze_data["content"] = result.stdout
+                
+            context_content = f"""
+            第 {step_idx + 1} 步: {step} 的内容产出:
+            {response}
+            """
             
             # 更新上下文
-            context.append(response)
+            context.append(context_content)
+            # 如果是最后一步，标记任务完成
+            if step_idx == len(steps) - 1:
+                analyze_data["status"] = "completed"
+            await safe_send(websocket, task_info)
         
-        # 标记任务完成
-        task_info["tasks"][0]["status"] = "completed"
         # 删除链接池中的任务
         del connected_clients[task_info["taskId"]]
-        await safe_send(websocket, task_info)
         
     except Exception as e:
         logger.error(f"任务执行失败: {str(e)}")

@@ -75,40 +75,34 @@ export function useWebSocket(): UseWebSocketReturn {
       try {
         const data = event.data;
 
-        switch (data.type) {
-          case "STEP_UPDATE": {
-            const updatedStep = data.step;
-            let newSteps: ExecutionStep[] = [];
+        const updatedStep = data.step;
+        let newSteps: ExecutionStep[] = [];
+        // 如果步骤已存在，则更新它
+        if (stepsRef.current.some((step) => step.id === updatedStep.id)) {
+          newSteps = stepsRef.current.map((step) =>
+            step.id === updatedStep.id ? updatedStep : step
+          );
+        } else {
+          // 否则添加新步骤
+          newSteps = [...stepsRef.current, updatedStep];
+        }
+        console.log("watch 666:", event.data, newSteps);
+        stepsRef.current = newSteps;
+        setSteps(newSteps);
+        // 更新当前步骤索引
+        if (updatedStep.status === "running") {
+          const newIndex = newSteps.findIndex(
+            (step) => step.id === updatedStep.id
+          );
+          setCurrentStepIndex(newIndex);
 
-            // 如果步骤已存在，则更新它
-            if (stepsRef.current.some((step) => step.id === updatedStep.id)) {
-              newSteps = stepsRef.current.map((step) =>
-                step.id === updatedStep.id ? updatedStep : step
-              );
-            } else {
-              // 否则添加新步骤
-              newSteps = [...stepsRef.current, updatedStep];
-            }
-            console.log("watch 666:", event.data, newSteps);
-            stepsRef.current = newSteps;
-            setSteps(newSteps);
-            // 更新当前步骤索引
-            if (updatedStep.status === "running") {
-              const newIndex = newSteps.findIndex(
-                (step) => step.id === updatedStep.id
-              );
-              setCurrentStepIndex(newIndex);
-
-              // 自动选择当前运行的步骤
-              setSelectedStepId(updatedStep.id);
-            } else if (updatedStep.status === "completed") {
-              setIsComplete(true);
-            } else {
-              setError("系统异常");
-              setIsComplete(true);
-            }
-            break;
-          }
+          // 自动选择当前运行的步骤
+          setSelectedStepId(updatedStep.id);
+        } else if (updatedStep.status === "completed") {
+          setIsComplete(true);
+        } else {
+          setError("系统异常");
+          setIsComplete(true);
         }
       } catch (error) {
         console.error("Error parsing WebSocket message:", error);

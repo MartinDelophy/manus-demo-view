@@ -123,7 +123,7 @@ export class RealWebSocket implements WebSocketService {
           console.log("WebSocket message received:", data);
           if (Reflect.has(data, "taskId")) {
             this.emit("message", {
-              data: { type: "STEP_UPDATE", step: tasks[tasks.length - 1] },
+              data: { step: tasks[tasks.length - 1] },
             });
             return
           }
