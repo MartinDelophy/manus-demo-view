@@ -61,7 +61,11 @@ async def run_task(websocket, task_info):
         flow_text = task_info["flow_text"]
         steps = extract_todo_list(flow_text)
         task_info["max_steps"] = len(steps)
-        context = []
+        start_content = f"""
+        任务开始: {task_info["taskName"]}
+        任务流程: {flow_text}
+        """
+        context = [start_content]
         
         for step_idx, step in enumerate(steps):
             # 执行当前步骤
