@@ -167,7 +167,7 @@ export function PreviewContent({
 
         {type === "markdown" && (
           <div className="prose prose-invert max-w-none text-white">
-            <ReactMarkdown>{content}</ReactMarkdown>
+            <ReactMarkdown>{content.replaceAll("\\n", "\n").replaceAll("\n", "\n\n")}</ReactMarkdown>
           </div>
         )}
 
