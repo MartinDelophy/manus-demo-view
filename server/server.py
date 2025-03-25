@@ -80,9 +80,9 @@ async def run_task(websocket, task_info):
             await safe_send(websocket, task_info)
             # 上报任务执行过程
             async def report(command):
-                analyze_data["type"] = "txt"
+                analyze_data["type"] = "terminal"
                 if analyze_data.get("preview"):
-                    analyze_data["preview"]["type"] = "txt"
+                    analyze_data["preview"]["type"] = "terminal"
                     if command:
                         analyze_data["preview"]["content"] = command
                 await safe_send(websocket, task_info)
@@ -99,9 +99,9 @@ async def run_task(websocket, task_info):
                     with open('./tmp/sandbox_code.py', 'w') as f:
                         f.write(python_code[0])
                 result = subprocess.run(['python', './tmp/sandbox_code.py'], capture_output=True, text=True, check=True)
-                analyze_data["type"] = "txt"
+                analyze_data["type"] = "terminal"
                 if analyze_data.get("preview"):
-                    analyze_data["preview"]["type"] = "txt"
+                    analyze_data["preview"]["type"] = "terminal"
                     if result.stderr:
                         analyze_data["preview"]["content"] = result.stderr
                 print(f"Python执行结果: {result.stdout}")
