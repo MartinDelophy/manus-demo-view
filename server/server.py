@@ -130,11 +130,11 @@ async def handle_connection(websocket):
         while True:
             try:
                 message = await websocket.recv()
+                # 这里可以根据需要处理客户端后续发送的消息
+                print(f"Received message from client: {message}")
                 task_info = await initialize_task_info(websocket, json.loads(message)["query"])
                 # 启动任务执行协程
                 await run_task(websocket, task_info)
-                # 这里可以根据需要处理客户端后续发送的消息
-                print(f"Received message from client: {message}")
             except websockets.exceptions.ConnectionClosedOK:
                 print("Client connection closed normally")
                 break
